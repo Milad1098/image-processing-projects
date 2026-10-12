@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Document Scanner — Milad Mobaseri</title>
+  <meta name="description" content="Free in-browser document scanner: auto-crop, shadow removal, PDF export. Your photos never leave your device.">
+  <meta name="author" content="Milad Mobaseri">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="wrap">
+    <a class="back" href="https://miladmobaseri.ir" data-i18n="back">← Back to site</a>
+    <h1 data-i18n="title">Document Scanner</h1>
+    <p class="muted" data-i18n="tagline">Turn a phone photo into a clean scan. Runs entirely in your browser.</p>
+    <p class="credit"><span data-i18n="by">Built by</span> <a href="https://miladmobaseri.ir" data-i18n="author">Milad Mobaseri</a></p>
+  </header>
+
+  <main class="wrap">
+    <section id="loader" class="card center">
+      <div class="spinner" aria-hidden="true"></div>
+      <p id="loader-text" data-i18n="loading">Loading the scanner engine… (first time only, ~15 s)</p>
+    </section>
+
+    <section id="upload" class="card center" hidden>
+      <label class="drop" for="file">
+        <span class="drop-icon" aria-hidden="true">📄</span>
+        <strong data-i18n="choose">Choose or take a photo of a document</strong>
+        <span class="muted" data-i18n="drop">or drop it here</span>
+      </label>
+      <input id="file" type="file" accept="image/*" hidden>
+    </section>
+
+    <section id="editor" hidden>
+      <div class="grid">
+        <div class="card">
+          <h2 data-i18n="crop">1. Adjust the corners</h2>
+          <p id="detect-status" class="muted"></p>
+          <canvas id="crop" aria-label="Photo with draggable page corners"></canvas>
+        </div>
+        <div class="card">
+          <h2 data-i18n="result">2. Result</h2>
+          <div class="result-box"><img id="result" alt="Scanned page"><div id="busy" class="spinner" hidden></div></div>
+
+          <div class="segmented" role="radiogroup" aria-label="Filter">
+            <button data-mode="magic" class="active" data-i18n="magic">Magic color</button>
+            <button data-mode="gray" data-i18n="gray">Grayscale</button>
+            <button data-mode="bw" data-i18n="bw">Black &amp; white</button>
+            <button data-mode="original" data-i18n="original">Original</button>
+          </div>
+          <div class="row">
+            <button id="rot-left" class="btn" data-i18n="rotLeft">⟲ Rotate</button>
+            <button id="rot-right" class="btn" data-i18n="rotRight">Rotate ⟳</button>
+          </div>
+          <div class="row">
+            <button id="add" class="btn primary" data-i18n="add">➕ Add page to PDF</button>
+            <button id="save-png" class="btn" data-i18n="savePng">⬇ Image</button>
+          </div>
+          <button id="new" class="btn ghost" data-i18n="new">↺ Scan another photo</button>
+        </div>
+      </div>
+
+      <div id="pages-card" class="card" hidden>
+        <h2><span data-i18n="pages">PDF pages</span> (<span id="page-count">0</span>)</h2>
+        <div id="pages" class="pages"></div>
+        <button id="save-pdf" class="btn primary" data-i18n="savePdf">⬇ Download PDF</button>
+      </div>
+    </section>
+
+    <section id="feedback" class="card">
+      <h2 data-i18n="fbTitle">How did it go?</h2>
+      <div class="row">
+        <button class="btn" data-vote="good" data-i18n="good">👍 Worked well</button>
+        <button class="btn" data-vote="bad" data-i18n="bad">👎 Had a problem</button>
+      </div>
+      <textarea id="fb-text" rows="3" data-i18n-placeholder="fbPlaceholder" placeholder="What went wrong, or what should be added? (optional)"></textarea>
+      <button id="fb-send" class="btn primary" data-i18n="send">Send feedback</button>
+      <p id="fb-thanks" class="muted" hidden data-i18n="thanks">Thanks! Your feedback was sent.</p>
+    </section>
+  </main>
+
+  <footer class="wrap muted">
+    <p data-i18n="privacy">🔒 Your photos are processed on your device and never uploaded.</p>
+    <p>© <a href="https://miladmobaseri.ir" target="_blank" rel="noopener">Milad Mobaseri</a> · Python + OpenCV, compiled to WebAssembly</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

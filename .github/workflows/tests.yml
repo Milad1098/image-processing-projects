@@ -1,0 +1,20 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  document-scanner:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 01-document-scanner
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # the algorithm and its tests need only these; gradio is for the optional local UI
+      - run: pip install opencv-python-headless numpy pillow
+      - run: python -m tests.test_pipeline

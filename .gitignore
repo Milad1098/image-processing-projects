@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+output/
+.gradio/
+.playwright-mcp/
+
+# personal test photos stay local; README figures live in docs/images/
+samples/
