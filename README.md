@@ -13,12 +13,16 @@
 
 </div>
 
+<div dir="rtl">
+
 | # | پروژه | تکنیک‌های اصلی | دمو | وضعیت |
 |---|---|---|---|---|
 | 01 | [**اسکنر اسناد**](01-document-scanner/) | لبه‌یابی، کانتور، تبدیل پرسپکتیو، حذف سایه، آستانه‌گذاری تطبیقی | [امتحانش کن](https://miladmobaseri.ir/fa/tools/scanner) | ✅ |
 | 02 | تبدیل عکس به پیکسل‌آرت | کوچک‌سازی، کاهش رنگ با K-Means | | ⏳ |
 | 03 | شمارنده‌ی اسکوات | تخمین وضعیت بدن، زاویه‌ی مفاصل | | ⏳ |
 | 04 | تشخیص زنده‌ی اشیا | YOLO، شمارش اشیا | | ⏳ |
+
+</div>
 
 <p align="center">
   <a href="01-document-scanner/"><img src="01-document-scanner/docs/images/before-after.jpg" width="560" alt="Document scanner: phone photo and cleaned scan"></a>
