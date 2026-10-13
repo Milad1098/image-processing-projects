@@ -40,6 +40,16 @@ A visitor on a slow connection downloads each model once; later visits load it f
 Other processes can only slow a run down. After two rounds of inconsistent medians, the
 minimum over repeated runs (after warm-up) gave stable, correctly ordered numbers.
 
+### Edge tightening instead of a guided filter
+The guided filter is the textbook refinement but raised MAE by 16–33% and copied background
+edges into the matte on busy backgrounds. Clamping the matte (below 0.2 → 0, above 0.8 → 1)
+removed the halo and cut MAE by 11–12% on portraits, for free. Its cost: very fine hair loses
+partial transparency.
+
+### MODNet at its training resolution
+Feeding it 768 or 1024 px instead of 512 lowered every metric. Networks are run at the scale
+they were trained on.
+
 ### Evaluation data and weights are never committed
 Neither belongs to this project. `experiments/download.py` fetches them; results are
 reproducible without redistributing anything.

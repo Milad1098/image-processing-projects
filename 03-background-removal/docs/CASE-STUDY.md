@@ -132,6 +132,44 @@ laptop, one image took ~1.3 s (MODNet) and ~1.5 s (U²-Net-P), slower than nativ
 1-thread inference, which is what WebAssembly costs. WebGPU is the next step
 ([roadmap](ROADMAP.md)).
 
+## Finding 6: fixing the halo, and a textbook fix that made it worse
+
+**Symptom.** On real photos (4000×6000, straight from a camera) the cutouts had a light halo
+around the hair and shoulders. The matte is predicted at 512 px and upscaled ~8× to the
+photo; its edge becomes a wide, faint band, and the light background shows through it.
+
+**First attempt: a guided filter** (He et al., 2010), the standard way to snap a
+low-resolution matte to a photo's real edges. Tuned on a separate sample of 40 portraits and
+evaluated on the benchmark sample:
+
+- Boundary F rose slightly (+0.002 to +0.011), but MAE got **16–33% worse**.
+- On a test photo with a busy background (panelled wall), it **copied the wall's vertical
+  lines into the matte** as bright streaks beside the head. The filter makes the matte follow
+  the photo's edges, and the background's edges are edges too.
+- An earlier version of this test also had a flaw: images were capped at 1024 px, where the
+  matte is barely upscaled and there is almost no halo to fix. Measured at native resolution
+  instead, the conclusion did not change.
+
+**Also tried: running MODNet at a higher resolution** (768 or 1024 px instead of 512) to
+get a sharper matte in the first place. On the 40-image tuning sample it got **worse** (IoU 0.97 → 0.94, Boundary F
+0.94 → 0.84 at 1024 px): the network was trained at 512 px, and a bigger input is not more
+detail to a model that never saw that scale.
+
+**What worked: edge tightening.** Map matte values below 0.2 to fully transparent and above
+0.8 to fully opaque, stretching the band in between. The faint fringe, which is exactly where
+the halo lives, disappears; the threshold-based metrics (IoU, Boundary F) are unchanged by
+construction, and MAE drops:
+
+| model | test set | MAE before | MAE after |
+|---|---|---|---|
+| MODNet | portraits | 0.0144 | 0.0127 (−12%) |
+| U²-Net-P | portraits | 0.0238 | 0.0212 (−11%) |
+| U²-Net-P | objects | 0.0519 | 0.0487 (−6%) |
+
+It costs nothing at run time and was added to both the Python reference and the browser app
+(still identical: IoU 1.0000 against Python after the change). On the camera photo that
+showed the problem, the halo is gone.
+
 ---
 
 ## Takeaways
@@ -145,3 +183,7 @@ laptop, one image took ~1.3 s (MODNet) and ~1.5 s (U²-Net-P), slower than nativ
   numbers describe the machine's state instead of the model.
 - **Verify the port.** A re-implementation of pre/post-processing is a place for silent
   bugs; comparing outputs (IoU 0.9993–1.0) is what makes the benchmark apply to the app.
+- **Test the fix under the conditions of the bug.** The halo only exists when a small matte
+  is blown up to a large photo; a benchmark at 1024 px could not see it.
+- **The textbook fix is a hypothesis, not a result.** The guided filter made things worse on
+  busy backgrounds; a two-number clamp fixed what users actually saw.

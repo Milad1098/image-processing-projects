@@ -53,6 +53,7 @@ with three accuracy metrics and speed measured on one thread, as a browser would
 | Which model is best? | It depends on the photo: IS-Net leads on objects (0.94), BiRefNet on portraits (0.99); the portrait specialist MODNet scores 0.97 on people and 0.27 on objects |
 | Can the best model run in a browser? | Not on a phone: BiRefNet takes 15 s per image on one thread and is a 224 MB download. MODNet: 0.6 s, 26 MB |
 | Does the JavaScript port match the benchmark? | Yes: IoU 0.9993–1.0000 against the Python reference |
+| How to remove the light halo on large photos? | Not with a guided filter (MAE +16–33%, copied background edges) or a larger input (worse); a simple edge tightening cut matte error by 11–12% on portraits and removed the halo |
 
 <p align="center"><img src="docs/images/methods.png" alt="Six methods on a portrait and on a cat"></p>
 
@@ -68,10 +69,12 @@ bgremove/          reference pipeline in Python
   classic.py       GrabCut baseline
   metrics.py       IoU, MAE, Boundary F
   compose.py       transparent cutout, background replacement
+  refine.py        edge tightening (shipped) and guided filter (evaluated, rejected)
 experiments/
   download.py      models + test sets (not committed)
   run.py           accuracy benchmark -> docs/RESULTS.md (resumable, per-image cache)
   speed.py         clean speed benchmark (warm-up, minimum of repeated runs)
+  refine.py        edge-refinement experiment (tuned on a separate sample)
 web/               browser app: ONNX Runtime Web, no server-side processing
 tests/             metric values, pre/post-processing per model, GrabCut, composition
 docs/              case study, results, architecture, decisions, figures
@@ -92,6 +95,7 @@ python -m tests.test_bgremove      # self-check (no downloads needed)
 python -m experiments.download     # ~1 GB: models + test sets
 python -m experiments.run          # accuracy benchmark (~45 min on CPU, resumable)
 python -m experiments.speed        # speed benchmark
+python -m experiments.refine       # edge-refinement experiment
 python docs/make_figures.py        # regenerate the figures
 ```
 
@@ -102,6 +106,8 @@ The browser app fetches its models from Hugging Face on first use, so it works w
 
 - Object mode uses a 5 MB model (IoU 0.74 on objects); the accurate general models are too
   large for a phone browser today.
+- Hair is cut, not matted: fine strands become part of the subject or the background, never
+  semi-transparent, after edge tightening. A trade-off chosen to remove the halo.
 - One thread in the browser: ~1.3–1.5 s per photo on a laptop, slower on phones.
 - 100 images per test set; differences of ±0.01 IoU between close models are within noise.
 

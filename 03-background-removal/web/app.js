@@ -20,6 +20,9 @@ const MODELS = {
   },
 };
 const MODNET_REF = 512;   // MODNet short side, as in models.py
+// Matte values below/above these become fully transparent/opaque (bgremove/refine.py `tighten`):
+// removes the light halo left by upscaling a low-resolution matte. Matte error −11% on portraits.
+const TIGHTEN = [0.2, 0.8];
 const MAX_SIDE = 2048;    // input photos are shrunk to this first (memory on phones)
 const CREDIT = "miladmobaseri.ir";
 
@@ -156,7 +159,8 @@ function postprocess(output, spec, width, height) {
   ctx.drawImage(src, 0, 0, width, height);   // bilinear upscale of the matte, like cv2.INTER_LINEAR
   const up = ctx.getImageData(0, 0, width, height).data;
   const alpha = new Uint8ClampedArray(width * height);
-  for (let i = 0; i < alpha.length; i++) alpha[i] = up[i * 4];
+  const [low, high] = TIGHTEN.map((v) => v * 255);
+  for (let i = 0; i < alpha.length; i++) alpha[i] = ((up[i * 4] - low) / (high - low)) * 255;   // clamped by the array type
   return alpha;
 }
 

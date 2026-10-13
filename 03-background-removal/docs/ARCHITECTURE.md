@@ -30,6 +30,7 @@ network, which ONNX Runtime Web runs natively), and the outputs were checked to 
 | `classic.py` | GrabCut baseline seeded with a centered rectangle |
 | `metrics.py` | IoU, MAE, Boundary F |
 | `compose.py` | RGBA cutout, background replacement |
+| `refine.py` | `tighten` (applied in the app) and `guided` (evaluated, rejected) |
 
 A `ModelSpec` captures everything that differs between networks:
 
@@ -52,6 +53,8 @@ several GB while running, and holding all five crashed with an out-of-memory err
   interrupted run resumes where it stopped.
 - `experiments/speed.py`: clean timing (warm-up, best of two fresh sessions, minimum of
   repeated runs), all cores and one thread.
+- `experiments/refine.py`: edge refinements tuned on a separate 40-image sample (seed 1),
+  reported on the benchmark sample at native resolution.
 
 ## Browser app (`web/`)
 
@@ -60,7 +63,7 @@ mode click / photo ─► getSession(mode)
                         ├─ Cache Storage hit ─► bytes
                         └─ fetch from Hugging Face (pinned commit), progress bar ─► cache ─► bytes
                      ─► ort.InferenceSession (wasm, 1 thread unless cross-origin isolated)
-photo ─► shrink to ≤ 2048 px ─► preprocess ─► session.run ─► postprocess ─► alpha (Uint8)
+photo ─► shrink to ≤ 2048 px ─► preprocess ─► session.run ─► postprocess ─► tighten ─► alpha (Uint8)
 alpha + background choice ─► compose on <canvas> (transparent / white / color / blurred original)
 download ─► compose again with a small credit line ─► PNG
 ```

@@ -14,6 +14,7 @@ from skimage import data
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from bgremove import MODELS, grabcut, predict, replace_background   # noqa: E402
+from bgremove.refine import tighten                                  # noqa: E402
 
 OUT = Path(__file__).resolve().parent / "images"
 RESULTS = Path(__file__).resolve().parent.parent / "data" / "results.csv"
@@ -92,10 +93,11 @@ def main() -> None:
     mattes = {name: {m: grabcut(img) if m == "grabcut" else predict(m, img) for m in methods}
               for name, img in (("portrait", portrait), ("cat", cat))}
 
-    save("hero", grid([[tile(portrait, "Photo"), tile(on_checker(portrait, mattes["portrait"]["modnet"]), "MODNet, in the browser")]]))
+    app = tighten(mattes["portrait"]["modnet"])          # what the browser app shows (MODNet + tightening)
+    save("hero", grid([[tile(portrait, "Photo"), tile(on_checker(portrait, app), "MODNet, in the browser")]]))
     save("methods", grid([[tile(on_checker(img, mattes[name][m]), LABELS[m], 220) for m in methods]
                           for name, img in (("portrait", portrait), ("cat", cat))]))
-    alpha = mattes["portrait"]["modnet"]
+    alpha = app
     blurred = cv2.GaussianBlur(portrait, (0, 0), 8)
     save("backgrounds", grid([[tile(on_checker(portrait, alpha), "Transparent", 240),
                                tile(replace_background(portrait, alpha, (255, 255, 255)), "White", 240),

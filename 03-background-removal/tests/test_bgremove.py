@@ -1,10 +1,12 @@
 """Run: python -m tests.test_bgremove   (no test framework, no model download needed)"""
 
+import cv2
 import numpy as np
 
 from bgremove import cutout, grabcut, replace_background
 from bgremove.metrics import boundary_f, iou, mae
 from bgremove.models import MODELS, ModelSpec, input_size, postprocess, preprocess
+from bgremove.refine import guided, tighten
 
 
 def square(h, w, y0, y1, x0, x1):
@@ -47,6 +49,13 @@ def main() -> None:
     photo = np.full((240, 320, 3), (40, 120, 200), np.uint8)
     photo[60:180, 100:220] = (230, 60, 30)
     assert iou(grabcut(photo), square(240, 320, 60, 180, 100, 220)) > 0.9
+
+    # refinement: tighten clears faint values, saturates strong ones, keeps the middle ordered
+    ramp = np.linspace(0, 1, 11, dtype=np.float32)
+    t = tighten(ramp)
+    assert t[0] == t[2] == 0 and t[8] == t[10] == 1 and abs(t[5] - 0.5) < 1e-6 and np.all(np.diff(t) >= 0)
+    soft = cv2.GaussianBlur(square(240, 320, 60, 180, 100, 220), (0, 0), 6)
+    assert guided(photo, soft).shape == soft.shape                     # runs; kept only for the experiment
 
     # composition
     alpha = square(10, 10, 0, 5, 0, 10)
