@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Background Remover — Milad Mobaseri</title>
+  <meta name="description" content="Remove the background from any photo in your browser with deep learning. Your photos never leave your device.">
+  <meta name="author" content="Milad Mobaseri">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="wrap">
+    <a class="back" href="https://miladmobaseri.ir" data-i18n="back">← Back to site</a>
+    <h1 data-i18n="title">Background Remover</h1>
+    <p class="muted" data-i18n="tagline">Remove the background from a photo with deep learning. Runs entirely in your browser.</p>
+    <p class="credit"><span data-i18n="by">Built by</span> <a href="https://miladmobaseri.ir" data-i18n="author">Milad Mobaseri</a></p>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="field">
+        <label data-i18n="modeLabel">What is in the photo?</label>
+        <div class="segmented" role="radiogroup" aria-label="Subject type">
+          <button data-mode="person" class="active" data-i18n="person">👤 A person</button>
+          <button data-mode="object" data-i18n="object">📦 An object / product</button>
+        </div>
+        <p class="note" id="mode-note" data-i18n="personNote">Portrait model (MODNet, 26 MB): best for people, hair included.</p>
+      </div>
+
+      <div id="upload">
+        <label class="drop" for="file">
+          <span class="drop-icon" aria-hidden="true">✂️</span>
+          <strong data-i18n="choose">Choose a photo</strong>
+          <span class="muted" data-i18n="drop">or drop it here</span>
+        </label>
+        <input id="file" type="file" accept="image/*" hidden>
+      </div>
+
+      <div id="loader" class="center" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="loader-text"></p>
+        <div class="progress" aria-hidden="true"><div id="progress-bar"></div></div>
+      </div>
+    </section>
+
+    <section id="editor" hidden>
+      <div class="grid">
+        <div class="card">
+          <h2 data-i18n="original">Original</h2>
+          <div class="view"><img id="photo" alt="Original photo"></div>
+        </div>
+        <div class="card">
+          <h2 data-i18n="result">Result</h2>
+          <div class="view checker" id="result-view"><canvas id="result-canvas" aria-label="Photo with background removed"></canvas></div>
+          <p class="note" id="timing"></p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 20px">
+        <div class="field">
+          <label data-i18n="bgLabel">New background</label>
+          <div class="segmented" role="radiogroup" aria-label="Background">
+            <button data-bg="transparent" class="active" data-i18n="transparent">Transparent</button>
+            <button data-bg="white" data-i18n="white">White</button>
+            <button data-bg="color" data-i18n="color">Color</button>
+            <button data-bg="blur" data-i18n="blur">Blur</button>
+          </div>
+          <input id="bg-color" type="color" value="#ff4d4f" hidden aria-label="Background color">
+        </div>
+        <div class="row">
+          <button id="save" class="btn primary" data-i18n="save">⬇ Download PNG</button>
+          <button id="new" class="btn" data-i18n="new">↺ Another photo</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="feedback" class="card">
+      <h2 data-i18n="fbTitle">How did it go?</h2>
+      <div class="row">
+        <button class="btn" data-vote="good" data-i18n="good">👍 Clean cut</button>
+        <button class="btn" data-vote="bad" data-i18n="bad">👎 Had a problem</button>
+      </div>
+      <textarea id="fb-text" rows="3" data-i18n-placeholder="fbPlaceholder" placeholder="What went wrong, or what should be added? (optional)"></textarea>
+      <button id="fb-send" class="btn primary" data-i18n="send">Send feedback</button>
+      <p id="fb-thanks" class="muted" hidden data-i18n="thanks">Thanks! Your feedback was sent.</p>
+    </section>
+  </main>
+
+  <footer class="wrap muted">
+    <p data-i18n="privacy">🔒 Your photos are processed on your device and never uploaded.</p>
+    <p>© <a href="https://miladmobaseri.ir" target="_blank" rel="noopener">Milad Mobaseri</a> · ONNX Runtime Web · MODNet & U²-Net (Apache-2.0)</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

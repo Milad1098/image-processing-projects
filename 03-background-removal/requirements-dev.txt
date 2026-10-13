@@ -1,0 +1,3 @@
+-r requirements.txt
+scikit-image>=0.24   # public-domain images for figures
+pyarrow>=15          # reads the evaluation datasets (parquet)

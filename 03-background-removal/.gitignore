@@ -1,0 +1,3 @@
+# downloaded models and evaluation datasets: large, and not ours to redistribute
+models/*.onnx
+data/
