@@ -2,23 +2,27 @@
 // the same pre/post-processing as bgremove/models.py (tests/test_web_parity checks they agree).
 //
 // Optional config, set before this script loads:
-//   window.BGREMOVE_CONFIG = { endpoint: "/api/tool-events/" }
+//   window.BGREMOVE_CONFIG = { endpoint: "/api/tool-events/", modelBase: "models/" }
 // `endpoint` receives analytics + feedback as JSON POSTs. Without it, events only go to the console.
+// `modelBase` serves the model files from your own host (as models/<name>.onnx) instead of Hugging Face.
 
-const CONFIG = { endpoint: null, ...window.BGREMOVE_CONFIG };
+const CONFIG = { endpoint: null, modelBase: null, ...window.BGREMOVE_CONFIG };
 const IMAGENET = { mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225] };
 // Model files on Hugging Face (CORS-enabled), pinned to a commit so they can never change under us.
 // Both are byte-identical to the files benchmarked in docs/RESULTS.md.
 const MODELS = {
   person: {
+    file: "modnet.onnx",
     url: "https://huggingface.co/Xenova/modnet/resolve/fa2fa546052fba4c08921230a26cc69a333fca12/onnx/model.onnx",
     mb: 26, size: null, mean: [0.5, 0.5, 0.5], std: [0.5, 0.5, 0.5], output: "alpha", divideByMax: false,
   },
   object: {
+    file: "u2netp.onnx",
     url: "https://huggingface.co/BritishWerewolf/U-2-Netp/resolve/7112208dbac3a3642496c8d54e2f0f9bb3dc1dc8/onnx/model.onnx",
     mb: 5, size: 320, ...IMAGENET, output: "minmax", divideByMax: true,
   },
 };
+if (CONFIG.modelBase) for (const spec of Object.values(MODELS)) spec.url = CONFIG.modelBase + spec.file;
 const MODNET_REF = 512;   // MODNet short side, as in models.py
 // Matte values below/above these become fully transparent/opaque (bgremove/refine.py `tighten`):
 // removes the light halo left by upscaling a low-resolution matte. Matte error −11% on portraits.
